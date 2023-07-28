@@ -11,16 +11,10 @@ app.use(bodyParser.json())
 
 
 
-app.use('/api/authentication', require('./controllers/authenticationController'))
-app.use('/api/user', require('./controllers/userController'))
+app.use('/authentication', require('./controllers/authenticationController'))
+app.use('/user', require('./controllers/userController'))
 
 app.listen(port, () => {
     console.log(`localhost:${port}/api`)
     mongoDBConnection()
 })
-
-// const { graphqlHTTP } = require('express-graphql')
-// app.use('/graphql', graphqlHTTP({
-//     schema: require('./schemas/graphQL/graphQLSchema'),
-//     graphiql: true
-// }))
