@@ -18,8 +18,7 @@ controller.route('/signup').post(async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
 
         const user = await userSchema.create({
-            firstName, 
-            lastName, 
+            userName, 
             email, 
             password: hashedPassword
         })
