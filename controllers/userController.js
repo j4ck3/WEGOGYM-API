@@ -8,6 +8,8 @@ controller.param("id", async (req, res, next) => {
     next()
 })
 
+
+
 controller.route('/')
     .get(async (req, res) => {
         const users = await userSchema.find()
@@ -15,27 +17,45 @@ controller.route('/')
     })
 
 
-controller.route("/:id")
-    .get(authorize, (req, res) => {
-        if (req.user = !undefined)
-            res.status(200).json(req.user)
+    controller.route("/:id")
+    .get(authorize, async (req, res) => {
+        if (req.user = !undefined){
+            const filteredUser = {
+                _id: user._id,
+                email: user.email,
+                userName: user.userName
+            }
+            res.status(200).json(filteredUser);
+        }
         else
             res.status(404).json
     })
-    .put(authorize, (req, res) => {
+
+
+    // .get(authorize, async (req, res) => {
+    //     if (req.user !== undefined) {
+    //         const filteredUser = { ...user };
+    //         delete filteredUser.password;
+    //         res.status(200).json(filteredUser)
+    //     } else {
+    //         res.status(401).json({ message: 'Unauthorized' });
+    //     }
+    // })
+    
+    .put(authorize, async (req, res) => {
         if (req.user = !undefined) {
             users.forEach(user => {
                 if (user.id == req.user.id) {
-                    user.firstName = req.body.firstName ? req.body.firstName : body.firstName
-                    user.lastName = req.body.lastName ? req.body.firstName : body.lastName
-                    user.email = req.body.email ? req.body.firstName : body.email
+                    user.email = req.body.email ? req.body.email : body.email
+                    user.userName = req.body.userName ? req.body.userName : body.userName
+                    user.description = req.body.description ? req.body.description : body.description
                 }
+                else { res.status(401).json( {mesage: 'You are not authorized to edit this user.'}) }
             })
             res.status(200).json(req.user)
         }
         else
             res.status(404).json()
-
     })
     .delete(authorize, async (req, res) => {
         if (!req.params.id)

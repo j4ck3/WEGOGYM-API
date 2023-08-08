@@ -5,6 +5,7 @@ const userSchema = mongoose.Schema({
     userName: {type: String, required: [true, 'Username is required'], unique: true},
     email: {type: String, required: [true, 'Email is required'], unique: true},
     password: {type: String, required: [true, 'Password is required']},
+    description: {type: String},
 })
 
 module.exports = mongoose.model("users", userSchema)
