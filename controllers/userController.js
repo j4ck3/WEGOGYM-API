@@ -1,7 +1,7 @@
 const express = require('express')
 const controller = express.Router()
 const userSchema = require('../schemas/userSchema')
-const { authorize } = require('../services/authService')
+const { authorize, authorizeRole } = require('../middlewares/authService')
 
 controller.param("id", async (req, res, next) => {
     user = await userSchema.findById(req.params.id)
@@ -9,11 +9,14 @@ controller.param("id", async (req, res, next) => {
 })
 
 
-
 controller.route('/')
-    .get(async (req, res) => {
+    .get(authorizeRole("ADMIN"), async (req, res) => {
         const users = await userSchema.find()
-        res.status(200).json(users)
+        if (users)
+            return res.status(200).json(users)
+        else{
+            return res.status(200).json({msg: 'Error: No users found'}) 
+        }
     })
 
 
@@ -25,22 +28,11 @@ controller.route('/')
                 email: user.email,
                 userName: user.userName
             }
-            res.status(200).json(filteredUser);
+            return res.status(200).json(filteredUser);
         }
         else
-            res.status(404).json
+            return res.status(404).json
     })
-
-
-    // .get(authorize, async (req, res) => {
-    //     if (req.user !== undefined) {
-    //         const filteredUser = { ...user };
-    //         delete filteredUser.password;
-    //         res.status(200).json(filteredUser)
-    //     } else {
-    //         res.status(401).json({ message: 'Unauthorized' });
-    //     }
-    // })
     
     .put(authorize, async (req, res) => {
         if (req.user = !undefined) {
@@ -50,13 +42,15 @@ controller.route('/')
                     user.userName = req.body.userName ? req.body.userName : body.userName
                     user.description = req.body.description ? req.body.description : body.description
                 }
-                else { res.status(401).json( {mesage: 'You are not authorized to edit this user.'}) }
+                else {  return res.status(401).json( {mesage: 'You are not authorized to edit this user.'}) }
             })
             res.status(200).json(req.user)
         }
         else
             res.status(404).json()
     })
+
+
     .delete(authorize, async (req, res) => {
         if (!req.params.id)
             res.status(400).json()
@@ -69,8 +63,5 @@ controller.route('/')
             }
         }
     })
-
-
-
 
 module.exports = controller

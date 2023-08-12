@@ -2,17 +2,17 @@ const express = require('express')
 const bcrypt = require('bcryptjs')
 const controller = express.Router()
 const userSchema = require('../schemas/userSchema')
-const { generateAccessToken } = require('../services/authService')
+const { generateAccessToken } = require('../middlewares/authService')
 
 controller.route('/signup').post(async (req, res) => {
     const { userName, email, password } = req.body
 
     if (!userName || !email || !password)
-        return res.status(400).json('Please fill in all the fields.')
+        return res.status(400).json({msg: 'Please fill in all the fields.'})
 
     const exists = await userSchema.findOne({ email })
     if (exists){
-        return res.status(409).json('A user with the same e-mail already exists.')
+        return res.status(409).json({msg: 'A user with the same e-mail already exists.'})
     }
       
     else {
@@ -27,7 +27,7 @@ controller.route('/signup').post(async (req, res) => {
         if (user)
             res.status(201).json('Your accout was created.')
         else
-            return res.status(500).json( 'Something went wrong. We could not register you right now.')
+            return res.status(500).json({msg: 'Something went wrong. We could not register you right now.'})
     }
 })
 
@@ -36,18 +36,23 @@ controller.route('/signin').post(async (req, res) => {
     const { email, password } = req.body
 
     if (!email || !password)
-        res.status(400).json({ text: 'Please fill in the fields.' })
+        return res.status(400).json({msg: 'Please fill in the fields.'})
 
     const user = await userSchema.findOne({ email })
     if (user && await bcrypt.compare(password, user.password)) {
-        res.status(200).json({
+        const accessToken = generateAccessToken(user._id)
+         return res.status(200).json({
             text: 'Login successfull!',
-            accessToken: generateAccessToken(user._id),
-            user: user
+            accessToken: accessToken,
+            user: {
+                _id: user._id,
+                email: user.email,
+                userName: user.userName
+            }
         })
 
     } else {
-        res.status(400).json({ text: 'The email or password is incorrect.' })
+        return res.status(400).json({msg: 'The email or password is incorrect.'})
     }
 
 
